@@ -1,0 +1,31 @@
+upstream phpfpm {
+    server unix:/var/run/php5-fpm.sock;
+}
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ip6only=on;
+    server_tokens off;
+
+    root /var/www;
+    index index.php index.html index.htm;
+    autoindex on;
+
+    client_max_body_size 8M;
+
+    location / {
+        try_files $uri $uri/ / =404;
+    }
+
+    # Pass all PHP files onto PHP's Fast Process Manager server.
+    location ~ [^/]\.php(/|\?|$) {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        if (!-f $document_root$fastcgi_script_name) {
+            return 404;
+        }
+        try_files $fastcgi_script_name =404;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass phpfpm;
+    }
+}
