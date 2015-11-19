@@ -4,12 +4,13 @@ Isolated PHP server environment.
 
 ## Linked Containers
 
-The Janbox links to other containers to provide MySQL and Redis servers.
+The Janbox links to other containers to provide MySQL and Redis servers. This is obviously optional, or you can keep
+adding more and more linked containers.
 
 ```bash
 # Root password should be memorable because the MySQL server will only be available to linked containers.
-$ docker run -d --restart=always --name=janmysql -e "MYSQL_ROOT_PASSWORD=janmysql" mysql:latest
-$ docker run -d --restart=always --name=janredis redis:latest
+$ docker run -d --restart=always --name=mysql -e "MYSQL_ROOT_PASSWORD=mysql" mysql:latest
+$ docker run -d --restart=always --name=redis redis:latest
 ```
 
 ## Building
@@ -23,7 +24,16 @@ docker build --no-cache --rm -t janbox .
 ## Running
 
 ```bash
-docker run -d --env TERM=xterm --restart=always --name=janbox --link=janmysql --link=janredis -p 32526:80 janbox
+BOXNAME=janbox docker run \
+    --detach \
+    --env "TERM=xterm" \
+    --restart="always" \
+    --hostname="$BOXNAME" \
+    --name="$BOXNAME" \
+    --link="mysql" \
+    --link="redis" \
+    -p 32526:80 \
+    janbox
 ```
 
 Then add the following Nginx site configuration:

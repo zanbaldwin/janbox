@@ -3,7 +3,7 @@
 # https://github.com/phusion/baseimage-docker/blob/master/Changelog.md
 FROM        phusion/baseimage:0.9.17
 MAINTAINER  Zander Baldwin <hello@zanderbaldwin.com>
-# Don't volumise /var/www because it will automatically be owned by root and not webserver.
+# Don't volumise /var/www because it will automatically be owned by root and not the desired webserver user.
 # VOLUME      /var/www
 WORKDIR     /var/www
 EXPOSE      80
