@@ -24,12 +24,12 @@ docker build --no-cache --rm -t janbox .
 ## Running
 
 ```bash
-BOXNAME=janbox docker run \
+docker run \
     --detach \
     --env "TERM=xterm" \
     --restart="always" \
-    --hostname="$BOXNAME" \
-    --name="$BOXNAME" \
+    --hostname="janbox" \
+    --name="janbox" \
     --link="mysql" \
     --link="redis" \
     -p 32526:80 \
