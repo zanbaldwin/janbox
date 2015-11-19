@@ -1,16 +1,17 @@
-# Use "phusion/baseimage" as base image. To make your builds reproducible, make
-# sure you lock down to a specific version, not to `latest`!
-# See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
-# a list of version numbers.
-FROM phusion/baseimage:0.9.17
-MAINTAINER Zander Baldwin <hello@zanderbaldwin.com>
-VOLUME /var/www
-EXPOSE 80
+# Use "phusion/baseimage" as base image. To make your builds reproducible, make sure you lock down to a specific
+# version, not to "latest"! To see a list of version numbers, visit:
+# https://github.com/phusion/baseimage-docker/blob/master/Changelog.md
+FROM        phusion/baseimage:0.9.17
+MAINTAINER  Zander Baldwin <hello@zanderbaldwin.com>
+VOLUME      /var/www
+WORKDIR     /var/www
+EXPOSE      80
 # Don't forget to use the custom init system provided by phusion/baseimage.
-CMD ["/sbin/my_init"]
+CMD         ["/sbin/my_init"]
 
 # Upgrade the Operating System.
-RUN apt-get update && apt-get upgrade -y -o Dpkg::Options::="--force-confold"
+RUN apt-get update \
+ && apt-get upgrade -y -o Dpkg::Options::="--force-confold"
 
 # Install Nginx
 RUN apt-get install -y nginx
@@ -56,23 +57,34 @@ RUN chmod +x /etc/service/php5-fpm/run
 ADD config/pool-www.conf /etc/php5/fpm/pool.d/www.conf
 ADD config/php.ini /etc/php5/fpm/php.ini
 ADD config/php.ini /etc/php5/cli/php.ini
-RUN ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/15-mcrypt.ini
-RUN ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/15-mcrypt.ini
-RUN ln -s /etc/php5/mods-available/ps.ini /etc/php5/cli/conf.d/20-ps.ini
-RUN ln -s /etc/php5/mods-available/ps.ini /etc/php5/fpm/conf.d/20-ps.ini
+RUN ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/15-mcrypt.ini \
+ && ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/15-mcrypt.ini \
+ && ln -s /etc/php5/mods-available/ps.ini /etc/php5/cli/conf.d/20-ps.ini \
+ && ln -s /etc/php5/mods-available/ps.ini /etc/php5/fpm/conf.d/20-ps.ini
 
 # Install other software that will be used.
-RUN apt-get install -y mysql-client wget nano
+RUN apt-get install -y \
+    mysql-client \
+    wget \
+    nano \
+    git-flow
 
-RUN useradd -c Webserver -m -U webserver
-RUN mkdir -p /var/www && chown -R webserver:webserver /var/www && usermod -a -G sudo webserver
+# Create the Webserver user, adding it to sudoers.
+RUN useradd -c Webserver -m -U webserver \
+ && usermod -a -G sudo webserver
 ADD config/sudoers /etc/sudoers
 
-RUN apt-get install -y git-flow
-RUN wget -O /home/webserver/.bash_aliases https://raw.githubusercontent.com/zanderbaldwin/dotfiles/master/.bash_aliases && chown webserver:webserver /home/webserver/.bash_aliases
+# Create the webroot directory.
+RUN mkdir -p /var/www \
+ && chown -R webserver:webserver /var/www
+
+RUN wget -O /home/webserver/.bash_aliases https://raw.githubusercontent.com/zanderbaldwin/dotfiles/master/.bash_aliases \
+ && chown webserver:webserver /home/webserver/.bash_aliases
 
 # Install Composer
-RUN wget -O /usr/local/bin/composer https://getcomposer.org/composer.phar && chmod +x /usr/local/bin/composer
+RUN wget -O /usr/local/bin/composer https://getcomposer.org/composer.phar \
+ && chmod +x /usr/local/bin/composer
 
 # Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

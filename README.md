@@ -17,7 +17,7 @@ $ docker run -d --restart=always --name=janredis redis:latest
 Super simple!
 
 ```bash
-docker build -t janbox .
+docker build --no-cache --rm -t janbox .
 ```
 
 ## Running
@@ -53,5 +53,5 @@ server {
 Instead of adding a public key to `authorized_keys` as normal, add the following line (on the host machine):
 
 ```
-command="docker exec -it -u www-data janbox bash -l",no-port-forwarding,no-X11-forwarding,no-agent-forwarding <ssh public key "ssh-rsa .... user@email">
+command="docker exec -it -u webserver janbox bash -l",no-port-forwarding,no-X11-forwarding,no-agent-forwarding <ssh public key "ssh-rsa .... user@email">
 ```
