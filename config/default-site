@@ -4,7 +4,7 @@ upstream phpfpm {
 
 server {
     listen 80 default_server;
-    listen [::]:80 default_server ip6only=on;
+    listen [::]:80 default_server ipv6only=on;
     server_tokens off;
 
     root /var/www;

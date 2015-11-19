@@ -1,14 +1,13 @@
-# Use phusion/baseimage as base image. To make your builds reproducible, make
+# Use "phusion/baseimage" as base image. To make your builds reproducible, make
 # sure you lock down to a specific version, not to `latest`!
 # See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
 # a list of version numbers.
 FROM phusion/baseimage:0.9.17
-
 MAINTAINER Zander Baldwin <hello@zanderbaldwin.com>
-
-# Use baseimage-docker's init system.
-CMD ["/sbin/my_init"]
+VOLUME /var/www
 EXPOSE 80
+# Don't forget to use the custom init system provided by phusion/baseimage.
+CMD ["/sbin/my_init"]
 
 # Upgrade the Operating System.
 RUN apt-get update && apt-get upgrade -y -o Dpkg::Options::="--force-confold"
@@ -65,10 +64,15 @@ RUN ln -s /etc/php5/mods-available/ps.ini /etc/php5/fpm/conf.d/20-ps.ini
 # Install just the MySQL client, since we'll link to the MySQL server container.
 RUN apt-get install -y mysql-client
 
-RUN mkdir -p /var/www && chown -R root:root /var/www
+RUN useradd -c Webserver -m -U webserver
+RUN mkdir -p /var/www && chown -R webserver:webserver /var/www && usermod -a -G sudo webserver
+ADD config/sudoers /etc/sudoers
+
+RUN apt-get install -y git-flow
+RUN wget -O /home/webserver/.bash_aliases https://raw.githubusercontent.com/zanderbaldwin/dotfiles/master/.bash_aliases && chown webserver:webserver /home/webserver/.bash_aliases
 
 # Install Composer
-RUN apt-get install -y wget
+RUN apt-get install -y wget nano
 RUN wget -O /usr/local/bin/composer https://getcomposer.org/composer.phar && chmod +x /usr/local/bin/composer
 
 # Clean up APT when done.
