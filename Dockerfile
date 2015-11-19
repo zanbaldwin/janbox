@@ -61,8 +61,8 @@ RUN ln -s /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/15-mcrypt.ini
 RUN ln -s /etc/php5/mods-available/ps.ini /etc/php5/cli/conf.d/20-ps.ini
 RUN ln -s /etc/php5/mods-available/ps.ini /etc/php5/fpm/conf.d/20-ps.ini
 
-# Install just the MySQL client, since we'll link to the MySQL server container.
-RUN apt-get install -y mysql-client
+# Install other software that will be used.
+RUN apt-get install -y mysql-client wget nano
 
 RUN useradd -c Webserver -m -U webserver
 RUN mkdir -p /var/www && chown -R webserver:webserver /var/www && usermod -a -G sudo webserver
@@ -72,7 +72,6 @@ RUN apt-get install -y git-flow
 RUN wget -O /home/webserver/.bash_aliases https://raw.githubusercontent.com/zanderbaldwin/dotfiles/master/.bash_aliases && chown webserver:webserver /home/webserver/.bash_aliases
 
 # Install Composer
-RUN apt-get install -y wget nano
 RUN wget -O /usr/local/bin/composer https://getcomposer.org/composer.phar && chmod +x /usr/local/bin/composer
 
 # Clean up APT when done.
